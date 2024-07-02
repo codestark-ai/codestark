@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - View Messages</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<section id="admin" class="py-5">
+    <div class="container">
+        <h2 class="text-center">Admin - View Messages</h2>
+        <div id="messages"></div>
+    </div>
+</section>
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDaw14ObskGwa7hQercSk1fV2UKjPAR9WM",
+    authDomain: "messagesystem-eeeff.firebaseapp.com",
+    projectId: "messagesystem-eeeff",
+    storageBucket: "messagesystem-eeeff.appspot.com",
+    messagingSenderId: "598313955367",
+    appId: "1:598313955367:web:eed85937a6586f93aa9e02",
+    measurementId: "G-FQNJ572KWM"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Function to delete a message
+  const deleteMessage = async (messageId) => {
+      try {
+          await deleteDoc(doc(db, 'messages', messageId));
+          console.log('Document successfully deleted!');
+      } catch (error) {
+          console.error('Error removing document: ', error);
+      }
+  };
+
+  // Fetch and display messages
+  const messagesDiv = document.getElementById('messages');
+  const messagesQuery = query(collection(db, 'messages'), orderBy('timestamp', 'desc'));
+
+  onSnapshot(messagesQuery, (querySnapshot) => {
+      messagesDiv.innerHTML = '';
+      querySnapshot.forEach((doc) => {
+          const message = doc.data();
+          const messageId = doc.id; // Get the document ID
+
+          // Display message and delete button
+          messagesDiv.innerHTML += `
+              <div class="message">
+                  <h3>${message.name}</h3>
+                  <p><strong>Email:</strong> ${message.email}</p>
+                  <p><strong>Phone:</strong> ${message.phone}</p>
+                  <p><strong>Message:</strong> ${message.message}</p>
+                  <p><strong>Timestamp:</strong> ${message.timestamp ? message.timestamp.toDate().toLocaleString() : 'N/A'}</p>
+                  <button class="delete-btn button" data-id="${messageId}">
+                      <svg viewBox="0 0 448 512" class="svgIcon"><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"></path></svg>
+                      
+                  </button>
+              </div>
+              <hr>
+          `;
+      });
+
+      // Add event listeners to delete buttons
+      const deleteButtons = document.querySelectorAll('.delete-btn');
+      deleteButtons.forEach((button) => {
+          button.addEventListener('click', async (e) => {
+              const messageId = e.target.getAttribute('data-id');
+              await deleteMessage(messageId);
+          });
+      });
+  });
+</script>
+
+</body>
+</html>
