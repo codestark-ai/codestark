@@ -1,3 +1,3 @@
 function makeCall() {
-    window.location.href = "tel:+8778609373";
+    window.location.href = "tel:+91 8778609373";
  }
